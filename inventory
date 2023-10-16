@@ -1,4 +1,6 @@
 
 10.46.11.5
 10.46.11.18
-10.46.11.65 apache_package=httpd php_package=php
+
+[centos]
+10.46.11.65 

@@ -1,13 +1,11 @@
 ---
 
-- hosts: 10.46.11.65
+- hosts: centos
   become: true
   tasks:
 
-  - name: install apache and php package
-    package:
-      name: 
-        - "{{ apache_package }}"
-        - "{{ php_package }}"
-      state: latest
+  - name: install updates (CentOS)
+    dnf:
+      update_only: yes
       update_cache: yes
+    when: ansible_distribution == "CentOS"
