@@ -1,0 +1,101 @@
+---
+#
+# Run playbook: ansible-playbook 01b-prepare-ubuntu-localhost-git.yml -K    (Capital case K !)
+# And enter the correct password of your local Ubuntu system
+#
+# Ansible.cfg: stdout_callback = unixy
+
+- hosts: localhost    # Configure your local Ubuntu host
+  gather_facts: no
+  vars:
+    put_tritons_lab_git_here: /opt/git/tritons-lab
+
+  tasks:
+
+  - name: 01 Run test who am i - this local (Ubuntu) user name is used as a var at step 03 to create a dir with proper rights
+    command: "whoami"
+    register: whoami_output
+  - debug: var=whoami_output.stdout
+
+  - name: 02 - Manually command is sudo apt-get install <package-name>
+    become: yes
+    apt:
+      name:
+        - expect
+        - sshpass
+        - git
+        
+      state: present
+
+  - name: 03 Create a git directory {{put_tritons_lab_git_here}} if it does not exist for user {{whoami_output.stdout}}
+    become: yes
+    file:
+      path: '{{put_tritons_lab_git_here}}'
+      state: directory
+      mode: '0766'
+      owner: '{{whoami_output.stdout}}'
+      group: '{{whoami_output.stdout}}'
+
+############### Ensure your GIT configuration is already there, otherwise configure manually on localhost first with:
+############### git config --global user.name "<ruisnaam>"
+############### git config --global user.email "<emailadres>"
+############### You can also use this cmd to view current config -  cat ~/.gitconfig
+
+  - name: 04 Check GIT configuration from all scopes - user.email and user.name must be there
+    git_config:
+      list_all: yes
+    register: git_output
+  - debug: var=git_output
+
+  - name: 05 clone git to your localhost in path - {{put_tritons_lab_git_here}}
+    become: no
+    git:
+      repo: 'git@10.75.128.21:/opt/application/git/tritons.git'
+      dest: '{{put_tritons_lab_git_here}}'
+      clone: yes
+
+  - name: 06 Do a list of path - {{put_tritons_lab_git_here}} to see clone results
+    command: "ls -al {{put_tritons_lab_git_here}}"
+
+
+############### After the playbook ran succesful, you can do git pull (download) and git push (upload) changes
+
+############### 1)pull example (get updates! sync with the central GIT server)
+############### cd /opt/git/tritons-lab
+############### git pull origin master
+ 
+############### 2) push example (upload your changes! sync with the central GIT server)
+############### 2a) Make changes, example:
+############### cd /opt/git/tritons-lab
+############### touch mytest.txt
+
+############### 2b) Add changes to local staging area
+############### git add mytest.txt     copy to staging area, only works when it contains files
+############### git status -s          (optional)
+############### git add --dry-run .    (optional) showing you what it would have done 
+
+############### 2c) commit
+
+############### git commit -m "add mytest.txt by <User>"  add comment, make available for upload
+############### git status -s                             (optional)
+############### git commit --amend -m 'Changed file'      (optional) corrects already committed changes > use git amend > changes the last commit + message + new commit ID.
+############### git status -s                             (optional)
+
+############### 2d) checks          (optional)
+############### git log    
+
+############### Example output
+
+############### commit 489f1e934ac98bb550b0ac32fa691b52552d3814 (HEAD -> master)
+############### Author: <user>
+############### Date:   Fri Jul 23 11:58:52 2021 +0200
+############### add first repo subdir by <User>
+
+############### More details:
+
+############### git show 489f1e934ac98bb550b0ac32fa691b52552d3814
+############### git diff
+
+
+############### 2e) Finally upload changes, but first make sure your local GIT is in sync, do a git pull, see step 1
+############### git push origin master
