@@ -10,4 +10,4 @@
         - "{{ apache_package }}"
         - "{{ php_package }}"
       state: latest
-      update_cache: no
+      update_cache: yes
