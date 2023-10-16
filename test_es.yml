@@ -8,7 +8,7 @@
 - hosts: localhost    # Configure your local Ubuntu host
   gather_facts: no
   vars:
-    put_tritons_lab_git_here: /opt/git/tritons-lab
+    put_home_lab_git_here: /home/smold801/ansible_projects
 
   tasks:
 
@@ -27,10 +27,10 @@
         
       state: present
 
-  - name: 03 Create a git directory {{put_tritons_lab_git_here}} if it does not exist for user {{whoami_output.stdout}}
+  - name: 03 Create a git directory {{put_home_lab_git_here}} if it does not exist for user {{whoami_output.stdout}}
     become: yes
     file:
-      path: '{{put_tritons_lab_git_here}}'
+      path: '{{put_home_lab_git_here}}'
       state: directory
       mode: '0766'
       owner: '{{whoami_output.stdout}}'
@@ -47,14 +47,14 @@
     register: git_output
   - debug: var=git_output
 
-  - name: 05 clone git to your localhost in path - {{put_tritons_lab_git_here}}
+  - name: 05 clone git to your localhost in path - {{put_home_lab_git_here}}
     become: no
     git:
-      repo: 'git@10.75.128.21:/opt/application/git/tritons.git'
-      dest: '{{put_tritons_lab_git_here}}'
+      repo: 'git@github.com:smolly/ansible_projects.git'
+      dest: '{{put_home_lab_git_here}}'
       clone: yes
 
-  - name: 06 Do a list of path - {{put_tritons_lab_git_here}} to see clone results
+  - name: 06 Do a list of path - {{put_home_lab_git_here}} to see clone results
     command: "ls -al {{put_tritons_lab_git_here}}"
 
 
