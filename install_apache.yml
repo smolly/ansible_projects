@@ -1,0 +1,10 @@
+---
+
+- hosts: 10.46.11.65
+  become: true
+  tasks:
+
+  - name: install apache package
+    yum:
+      name: httpd 
+      
