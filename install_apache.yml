@@ -4,8 +4,24 @@
   become: true
   tasks:
 
-  - name: install updates (CentOS)
+  # - name: install updates (CentOS)
+  #   dnf:
+  #     update_only: yes
+  #     update_cache: yes
+  #   when: ansible_distribution == "CentOS"
+
+  - name: install
+    tags: apache,centos,httpd
     dnf:
-      update_only: yes
-      update_cache: yes
-    when: ansible_distribution == "CentOS"
+      name:
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == "CentOS"    
+
+  - name: start httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: started
+    when: ansible_distribution == "CentOS"   
